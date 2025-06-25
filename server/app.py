@@ -16,7 +16,6 @@ CORS(app)
 # Config
 app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
-
 # Register blueprints
 app.register_blueprint(deployment_bp)
 
