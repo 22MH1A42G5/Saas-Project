@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000'; // Your Flask backend URL
+const API_BASE_URL = 'http://localhost:2000'; // Your Flask backend URL
 
 const authService = {
   // Register a new user

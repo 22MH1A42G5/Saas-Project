@@ -28,45 +28,36 @@ function NewDeploymentPage() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '40px auto', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px #eee', padding: 32 }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 24 }}>New Deployment Wizard</h2>
-      
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
-        {steps.map((label, idx) => (
-          <div key={label} style={{ 
-            flex: 1, 
-            textAlign: 'center', 
-            color: idx === activeStep ? '#007bff' : '#aaa', 
-            fontWeight: idx === activeStep ? 'bold' : 'normal',
-            fontSize: '14px'
-          }}>
-            {label}
-            {idx < steps.length - 1 && <span style={{ margin: '0 8px' }}>→</span>}
-          </div>
-        ))}
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '40px 0' }}>
+      <div className="card" style={{ maxWidth: 600, margin: '40px auto' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 24 }}>New Deployment Wizard</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
+          {steps.map((label, idx) => (
+            <div key={label} style={{
+              flex: 1,
+              textAlign: 'center',
+              color: idx === activeStep ? 'var(--primary)' : 'var(--muted)',
+              fontWeight: idx === activeStep ? 'bold' : 'normal',
+              fontSize: '15px',
+              borderBottom: idx === activeStep ? '2px solid var(--primary)' : '2px solid transparent',
+              paddingBottom: 8,
+              transition: 'color 0.2s, border 0.2s'
+            }}>
+              {label}
+              {idx < steps.length - 1 && <span style={{ margin: '0 8px', color: 'var(--muted)' }}>→</span>}
+            </div>
+          ))}
+        </div>
+        {activeStep === 0 && (
+          <Step1AWSSetup data={formData} update={updateFormData} next={nextStep} />
+        )}
+        {activeStep === 1 && (
+          <Step2GitHubSetup data={formData} update={updateFormData} next={nextStep} prev={prevStep} />
+        )}
+        {activeStep === 2 && (
+          <Step3Review data={formData} prev={prevStep} />
+        )}
       </div>
-
-      {activeStep === 0 && (
-        <Step1AWSSetup 
-          data={formData} 
-          update={updateFormData} 
-          next={nextStep} 
-        />
-      )}
-      {activeStep === 1 && (
-        <Step2GitHubSetup 
-          data={formData} 
-          update={updateFormData} 
-          next={nextStep} 
-          prev={prevStep} 
-        />
-      )}
-      {activeStep === 2 && (
-        <Step3Review 
-          data={formData} 
-          prev={prevStep} 
-        />
-      )}
     </div>
   );
 }

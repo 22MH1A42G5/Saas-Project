@@ -19,12 +19,12 @@ function Step1AWSSetup({ data, update, next }) {
       setError('');
       
       // TEMPORARY: Generate mock external ID for testing
-      const mockExternalId = 'ext_' + Math.random().toString(36).substr(2, 9);
-      update({ external_id: mockExternalId });
+      // const mockExternalId = 'ext_' + Math.random().toString(36).substr(2, 9);
+      // update({ external_id: mockExternalId });
 
       // ORIGINAL CODE (uncomment when backend is ready):
-      // const externalId = await externalIdService.generateExternalId();
-      // update({ external_id: externalId });
+      const externalId = await externalIdService.generateExternalId();
+      update({ external_id: externalId });
       
     } catch (err) {
       setError(err.message || 'Failed to generate external ID');
@@ -45,21 +45,21 @@ function Step1AWSSetup({ data, update, next }) {
       
       // TEMPORARY: Mock validation for testing
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mock validation result
-      const isValid = data.aws_arn.includes('arn:aws:iam:');
-      if (!isValid) {
-        setError('Invalid ARN format. Please check your ARN and try again.');
-        return;
-      }
-
-      // ORIGINAL CODE (uncomment when backend is ready):
-      // const isValid = await externalIdService.validateARN(data.aws_arn, data.external_id);
+      // const isValid = data.aws_arn.includes('arn:aws:iam:');
       // if (!isValid) {
-      //   setError('Invalid ARN or external ID. Please check your credentials.');
+      //   setError('Invalid ARN format. Please check your ARN and try again.');
       //   return;
       // }
+
+      // ORIGINAL CODE (uncomment when backend is ready):
+      const isValid = await externalIdService.validateARN(data.aws_arn, data.external_id);
+      if (!isValid) {
+        setError('Invalid ARN or external ID. Please check your credentials.');
+        return;
+      }
 
       // If validation passes, proceed to next step
       next();

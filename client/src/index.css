@@ -1,13 +1,90 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --primary: #2d6cdf;
+  --primary-light: #eaf1fb;
+  --accent: #f7b32b;
+  --bg: #f9fafb;
+  --surface: #fff;
+  --border: #e5e7eb;
+  --text: #22223b;
+  --muted: #8d99ae;
+  --radius: 12px;
+  --shadow: 0 2px 16px 0 rgba(44,62,80,0.07);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 0.7em 1em;
+  margin-bottom: 1em;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+}
+
+button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.7em 2em;
+  margin-right: 0.5em;
+  box-shadow: var(--shadow);
+  transition: background 0.2s;
+}
+
+button:disabled {
+  background: var(--muted);
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2em;
+  margin-bottom: 2em;
+  border: 1px solid var(--border);
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 0.3em;
+  display: block;
+  color: var(--muted);
+}
+
+h1, h2, h3 {
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
