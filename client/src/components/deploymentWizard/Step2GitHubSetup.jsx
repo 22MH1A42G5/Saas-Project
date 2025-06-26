@@ -1,64 +1,76 @@
 import React, { useState } from 'react';
 import GitHubHelpModal from '../modals/GitHubHelpModal';
+import externalIdService from '../../services/externalIdService';
 
 function Step2GitHubSetup({ data, update, next, prev }) {
   const [error, setError] = useState('');
   const [showGitHubHelp, setShowGitHubHelp] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleNext = (e) => {
-    e.preventDefault();
-    if (!data.github_repo || !data.github_pat || !data.stack) {
-      setError('Please fill in all required fields');
-      return;
-    }
-    setError('');
-    next();
+  const handleEnvVarChange = (idx, field, value) => {
+    const newVars = [...data.env_variables];
+    newVars[idx][field] = value;
+    update({ env_variables: newVars });
   };
 
   const addEnvVar = () => {
     update({ env_variables: [...data.env_variables, { key: '', value: '' }] });
   };
 
-  const removeEnvVar = (index) => {
-    update({ env_variables: data.env_variables.filter((_, i) => i !== index) });
+  const removeEnvVar = (idx) => {
+    update({ env_variables: data.env_variables.filter((_, i) => i !== idx) });
   };
 
-  const updateEnvVar = (index, field, value) => {
-    const newVars = data.env_variables.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
-    );
-    update({ env_variables: newVars });
+  const handleNext = async (e) => {
+    e.preventDefault();
+    if (!data.github_repo || !data.github_pat || !data.stack) {
+      setError('Please fill in all required fields');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      await externalIdService.submitGitHub(
+        data.deployment_id,
+        data.github_repo,
+        data.github_pat,
+        data.stack,
+        data.env_variables
+      );
+      next();
+    } catch (err) {
+      setError(err.message || 'Failed to save GitHub info');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleNext}>
       <h3>GitHub Setup</h3>
-      
-      <div style={{ marginBottom: '15px' }}>
-        <label>GitHub Repository (owner/repo):</label>
+      <div style={{ marginBottom: '20px' }}>
+        <label>GitHub Repository URL:</label>
         <input
           type="text"
           value={data.github_repo}
           onChange={e => update({ github_repo: e.target.value })}
-          placeholder="username/repository"
+          placeholder="https://github.com/your-username/your-repo"
           style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          required
         />
       </div>
-
-      <div style={{ marginBottom: '15px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <label>GitHub Personal Access Token:</label>
         <input
           type="password"
           value={data.github_pat}
           onChange={e => update({ github_pat: e.target.value })}
+          placeholder="Paste your GitHub PAT here"
           style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          required
         />
-        <button 
+        <button
           type="button"
           onClick={() => setShowGitHubHelp(true)}
-          style={{ 
+          style={{
             marginTop: '5px',
             padding: '4px 8px',
             backgroundColor: '#6c757d',
@@ -69,94 +81,84 @@ function Step2GitHubSetup({ data, update, next, prev }) {
             fontSize: '12px'
           }}
         >
-          Need help creating PAT?
+          Need help creating a PAT?
         </button>
       </div>
-
-      <div style={{ marginBottom: '15px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <label>Stack:</label>
         <select
           value={data.stack}
           onChange={e => update({ stack: e.target.value })}
           style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          required
         >
-          <option value="">Select your application stack</option>
-          <option value="flask">Flask (Python)</option>
-          <option value="nodejs">Node.js</option>
-          <option value="django">Django (Python)</option>
-          <option value="react">React (Node.js)</option>
-          <option value="express">Express.js (Node.js)</option>
-          <option value="fastapi">FastAPI (Python)</option>
-          <option value="spring">Spring Boot (Java)</option>
-          <option value="dotnet">ASP.NET Core (.NET)</option>
+          <option value="">Select stack</option>
+          <option value="flask">Flask</option>
+          <option value="node">Node.js</option>
+          {/* Add more stacks as needed */}
         </select>
       </div>
-
-      <div style={{ marginBottom: '15px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <label>Environment Variables:</label>
-        {data.env_variables.map((env, index) => (
-          <div key={index} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+        {data.env_variables.map((env, idx) => (
+          <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <input
               type="text"
               placeholder="Key"
               value={env.key}
-              onChange={e => updateEnvVar(index, 'key', e.target.value)}
-              style={{ flex: 1, padding: '8px' }}
+              onChange={e => handleEnvVarChange(idx, 'key', e.target.value)}
+              style={{ flex: 1 }}
             />
             <input
               type="text"
               placeholder="Value"
               value={env.value}
-              onChange={e => updateEnvVar(index, 'value', e.target.value)}
-              style={{ flex: 1, padding: '8px' }}
+              onChange={e => handleEnvVarChange(idx, 'value', e.target.value)}
+              style={{ flex: 1 }}
             />
-            {data.env_variables.length > 1 && (
-              <button 
-                type="button"
-                onClick={() => removeEnvVar(index)}
-                style={{ 
-                  padding: '8px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                ✕
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => removeEnvVar(idx)}
+              disabled={data.env_variables.length === 1}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: data.env_variables.length === 1 ? 'not-allowed' : 'pointer',
+                fontSize: '12px',
+                padding: '4px 8px'
+              }}
+            >
+              Remove
+            </button>
           </div>
         ))}
-        <button 
+        <button
           type="button"
           onClick={addEnvVar}
-          style={{ 
-            padding: '6px 12px',
-            backgroundColor: '#6c757d',
+          style={{
+            backgroundColor: '#17a2b8',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontSize: '12px'
+            fontSize: '12px',
+            padding: '4px 8px'
           }}
         >
-          + Add Variable
+          Add Variable
         </button>
       </div>
-
       {error && (
         <div style={{ color: 'red', marginBottom: '15px', padding: '8px', backgroundColor: '#f8d7da', borderRadius: '4px' }}>
           {error}
         </div>
       )}
-
       <div style={{ display: 'flex', gap: '10px' }}>
-        <button 
+        <button
           type="button"
           onClick={prev}
-          style={{ 
+          style={{
             padding: '10px 20px',
             backgroundColor: '#6c757d',
             color: 'white',
@@ -167,25 +169,23 @@ function Step2GitHubSetup({ data, update, next, prev }) {
         >
           ← Back
         </button>
-        <button 
+        <button
           type="submit"
-          style={{ 
+          disabled={loading}
+          style={{
             padding: '10px 20px',
-            backgroundColor: '#007bff',
+            backgroundColor: '#28a745',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1
           }}
         >
-          Continue →
+          {loading ? 'Saving...' : 'Continue'}
         </button>
       </div>
-
-      <GitHubHelpModal 
-        isOpen={showGitHubHelp}
-        onClose={() => setShowGitHubHelp(false)}
-      />
+      <GitHubHelpModal isOpen={showGitHubHelp} onClose={() => setShowGitHubHelp(false)} />
     </form>
   );
 }

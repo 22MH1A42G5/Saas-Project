@@ -12,6 +12,7 @@ const steps = [
 function NewDeploymentPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
+    deployment_id: '',
     aws_arn: '',
     external_id: '',
     github_repo: '',
